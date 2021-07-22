@@ -73,7 +73,10 @@ protected:
 	FVector GetForwordDirection();
 
 	UFUNCTION(BlueprintCallable)
-	int32 GetLevelBy_z(float z);
+	int32 GetHeroLevelBy_z(float z);
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetCubeLevelBy_z(float z);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void MyJump();

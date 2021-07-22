@@ -245,7 +245,7 @@ void ASuperHero::FaceKindSub()
 void ASuperHero::UpdateInfo()
 {
 	FVector Location = GetActorLocation();
-	int32 Level = GetLevelBy_z(Location.Z);
+	int32 Level = GetHeroLevelBy_z(Location.Z);
 	for (int i = StoreLevel;i <= Level + 1;i++) {
 		UpdateLevelInfo(i);
 		StoreLevel++;
@@ -256,7 +256,7 @@ void ASuperHero::MovetoPoint()
 {
 	FVector Location = GetActorLocation();
 	int32 Index = GetIndex(Location);
-	int32 Level = GetLevelBy_z(Location.Z);
+	int32 Level = GetHeroLevelBy_z(Location.Z);
 	if (Index < 0 || Index >= 32)
 		return;
 	FVector TargetLocation = LevelsPoints[FaceKind][Level][Index];
@@ -267,7 +267,7 @@ void ASuperHero::MovetoPoint()
 int32 ASuperHero::GetLevelLocationInfo(FVector Location)
 {
 	int32 Index = GetIndex(Location);
-	int32 Level = GetLevelBy_z(Location.Z);
+	int32 Level = GetHeroLevelBy_z(Location.Z);
 	int32 ans = LevelsInfo[FaceKind][Level][Index];
 	return ans;
 }
@@ -276,7 +276,7 @@ void ASuperHero::MoveToForwordPoint(int32 NextIndex)	//Temp Function
 {
 	FVector Location = GetActorLocation();
 	int32 Index = GetIndex(Location);
-	int32 Level = GetLevelBy_z(Location.Z);
+	int32 Level = GetHeroLevelBy_z(Location.Z);
 	FVector TargetLocation = Location;
 	if (Index < 0 || Index >= 32)
 		return;
@@ -298,7 +298,7 @@ FVector ASuperHero::GetLevelIndexPoint(int32 Index, int32 Level)
 TArray<AActor*> ASuperHero::GetCubesByHeroLocation(FVector Location)
 {
 	TArray<AActor*> Cubes;
-	int32 Level = GetLevelBy_z(Location.Z)+1;
+	int32 Level = GetHeroLevelBy_z(Location.Z);
 	int32 Index = GetIndex(Location);
 	FName CubeTag = FName(FString::FromInt(Level));
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), CubeTag, Cubes);
@@ -321,9 +321,17 @@ void ASuperHero::DisableCubesCollision(int32 CubeIndex, int32 CubeLevel)
 
 
 
-int32 ASuperHero::GetLevelBy_z(float z)
+int32 ASuperHero::GetHeroLevelBy_z(float z)
 {
-	int32 Level = int(z) / 100 - 1;
+	int32 Level = int(z) / 100-1;
+	if (int(z) % 100 > 70)
+		Level++;
+	return Level;
+}
+
+int32 ASuperHero::GetCubeLevelBy_z(float z)
+{
+	int32 Level = int(z) / 100;
 	if (int(z) % 100 > 70)
 		Level++;
 	return Level;
@@ -332,7 +340,7 @@ int32 ASuperHero::GetLevelBy_z(float z)
 bool ASuperHero::WillBeHidden()
 {
 	FVector Location = GetActorLocation();
-	int32 Level = GetLevelBy_z(Location.Z);
+	int32 Level = GetHeroLevelBy_z(Location.Z);
 	int32 Index = GetIndex(Location);
 	if (LevelsInfo[FaceKind][Level][Index] == 2)
 		return true;
