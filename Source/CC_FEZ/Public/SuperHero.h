@@ -64,7 +64,7 @@ protected:
 
 	void UpdateLevelInfo(int32 Level);
 
-	int32 GetNextIndex(float value, FVector &Location);
+	int32 GetNextIndex(float value);
 
 
 	UFUNCTION(BlueprintCallable)
@@ -72,6 +72,7 @@ protected:
 
 	FVector GetForwordDirection();
 
+	UFUNCTION(BlueprintCallable)
 	int32 GetLevelBy_z(float z);
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -100,6 +101,21 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void MovetoPoint();
+
+	UFUNCTION(BlueprintCallable)
+	void MoveToForwordPoint(int32 NextIndex);
+
+	UFUNCTION(BlueprintCallable)
+	void DisableCubesCollision(int32 CubeIndex,int32 CubeLevel);
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetLevelLocationInfo(FVector Location);
+
+	UFUNCTION(BlueprintCallable)
+	FVector GetLevelIndexPoint(int32 Index,int32 Level);
+
+	UFUNCTION(BlueprintCallable)
+	TArray<AActor*> GetCubesByHeroLocation(FVector Location);
 
 public:	
 	// Called every frame

@@ -56,11 +56,13 @@ void ASuperHero::BeginPlay()
 
 void ASuperHero::MoveForword(float value)
 {
-	if (value == 0.0f)
+	/**/if (value == 0.0f)
 		return;
+	UpdateInfo();
 	direction = GetForwordDirection();
+	int32 NextIndex = GetNextIndex(value);
+	//MoveToForwordPoint(NextIndex);
 	AddMovementInput(direction, value);
-
 }
 
 FVector ASuperHero::GetForwordDirection()
@@ -105,9 +107,10 @@ int32 ASuperHero::GetIndex(FVector Location)
 	return Index;
 }
 
-int32 ASuperHero::GetNextIndex(float value, FVector &Location)
+int32 ASuperHero::GetNextIndex(float value)
 {
 	int32 NextIndex;
+	FVector Location = GetActorLocation();
 	switch (FaceKind)
 	{
 	case 0:
@@ -183,16 +186,36 @@ void ASuperHero::UpdateLevelInfo(int32 Level)
 		FVector TargetLocation = Actor->GetActorLocation();
 		//FaceKind : 0
 		Index = int(TargetLocation.Y) / 100;
-		LevelsInfo[0][Level][Index] = 2;
+		if (TargetLocation.X < LevelsPoints[0][Level][Index].X) {
+			LevelsInfo[0][Level][Index] = 2;
+		}
+		else {
+			LevelsInfo[0][Level][Index] = 3;
+		}
 		//FaceKind : 1
 		Index = int(TargetLocation.X) / 100;
-		LevelsInfo[1][Level][Index] = 2;
+		if (TargetLocation.Y < LevelsPoints[1][Level][Index].Y) {
+			LevelsInfo[1][Level][Index] = 2;
+		}
+		else {
+			LevelsInfo[1][Level][Index] = 3;
+		}
 		//FaceKind : 2
 		Index = int(TargetLocation.Y) / 100;
-		LevelsInfo[2][Level][Index] = 2;
+		if (TargetLocation.X > LevelsPoints[2][Level][Index].X) {
+			LevelsInfo[2][Level][Index] = 2;
+		}
+		else {
+			LevelsInfo[2][Level][Index] = 3;
+		}
 		//FaceKind : 3
 		Index = int(TargetLocation.X) / 100;
-		LevelsInfo[3][Level][Index] = 2;
+		if (TargetLocation.Y > LevelsPoints[3][Level][Index].Y){
+			LevelsInfo[3][Level][Index] = 2;
+		}
+		else {
+			LevelsInfo[3][Level][Index] = 3;
+		}
 	}
 
 	for (int i = 0;i < 4;i++) {																//NO CUBE POINT USE LOWER LEVEL POINT CUBE
@@ -241,6 +264,63 @@ void ASuperHero::MovetoPoint()
 	SetActorLocation(TargetLocation);
 }
 
+int32 ASuperHero::GetLevelLocationInfo(FVector Location)
+{
+	int32 Index = GetIndex(Location);
+	int32 Level = GetLevelBy_z(Location.Z);
+	int32 ans = LevelsInfo[FaceKind][Level][Index];
+	return ans;
+}
+
+void ASuperHero::MoveToForwordPoint(int32 NextIndex)	//Temp Function
+{
+	FVector Location = GetActorLocation();
+	int32 Index = GetIndex(Location);
+	int32 Level = GetLevelBy_z(Location.Z);
+	FVector TargetLocation = Location;
+	if (Index < 0 || Index >= 32)
+		return;
+	if (LevelsInfo[FaceKind][Level][Index] == 1 && LevelsInfo[FaceKind][Level][NextIndex] != 2) {
+		TargetLocation.X = LevelsPoints[FaceKind][Level][Index].X - 3150.0f;
+	}
+	TargetLocation.Z = Location.Z;
+	SetActorLocation(TargetLocation);
+}
+
+
+
+FVector ASuperHero::GetLevelIndexPoint(int32 Index, int32 Level)
+{
+	FVector ans = LevelsPoints[FaceKind][Level][Index];
+	return ans;
+}
+
+TArray<AActor*> ASuperHero::GetCubesByHeroLocation(FVector Location)
+{
+	TArray<AActor*> Cubes;
+	int32 Level = GetLevelBy_z(Location.Z)+1;
+	int32 Index = GetIndex(Location);
+	FName CubeTag = FName(FString::FromInt(Level));
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), CubeTag, Cubes);
+	TArray<AActor*> AnsCubes;
+	FVector TargetLocation;
+	for (AActor* Cube : Cubes) {
+		TargetLocation = Cube->GetActorLocation();
+		if (GetIndex(TargetLocation) == Index)
+			AnsCubes.Add(Cube);
+	}
+	return AnsCubes;
+}
+
+void ASuperHero::DisableCubesCollision(int32 CubeIndex, int32 CubeLevel)
+{
+	TArray<AActor*> Cubes;
+	FName CubeTag = FName(FString::FromInt(CubeLevel));
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), CubeTag, Cubes);
+}
+
+
+
 int32 ASuperHero::GetLevelBy_z(float z)
 {
 	int32 Level = int(z) / 100 - 1;
@@ -259,6 +339,10 @@ bool ASuperHero::WillBeHidden()
 	else
 		return false;
 }
+
+
+
+
 
 // Called every frame
 void ASuperHero::Tick(float DeltaTime)
